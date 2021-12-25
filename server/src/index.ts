@@ -1,30 +1,24 @@
 import "reflect-metadata";
-import { ApolloServer, gql } from "apollo-server-express";
+import { ApolloServer } from "apollo-server-express";
 import express from "express";
+import { buildTypeDefsAndResolvers } from "type-graphql";
+import { UserResolver } from "./UserResolver";
 
-const typeDefs = gql`
-	type Query {
-		hello: String!
-	}
-`;
-
-const resolvers = {
-	Query: {
-		hello() {
-			return "world";
-		},
-	},
-};
 
 async function listen(port: number) {
 	const app = express();
 
 	app.get("/", (_req, res) => res.send("hello"));
 
+	const { typeDefs, resolvers } = await buildTypeDefsAndResolvers({
+		resolvers: [UserResolver],
+	});
+
 	const server = new ApolloServer({
 		typeDefs,
 		resolvers,
 	});
+
 	await server.start();
 
 	server.applyMiddleware({ app });
