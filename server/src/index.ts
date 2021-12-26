@@ -3,12 +3,14 @@ import { ApolloServer } from "apollo-server-express";
 import express from "express";
 import { buildTypeDefsAndResolvers } from "type-graphql";
 import { UserResolver } from "./UserResolver";
-
+import { createConnection } from "typeorm";
 
 async function listen(port: number) {
 	const app = express();
 
 	app.get("/", (_req, res) => res.send("hello"));
+
+	await createConnection();
 
 	const { typeDefs, resolvers } = await buildTypeDefsAndResolvers({
 		resolvers: [UserResolver],
