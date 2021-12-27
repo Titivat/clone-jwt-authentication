@@ -5,3 +5,6 @@ build/
 tmp/
 temp/
 package-lock.json
+server/yarn-error.log
+server/src/.env
+server/.env

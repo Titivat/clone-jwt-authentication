@@ -5,10 +5,17 @@ import {
 	Arg,
 	ObjectType,
 	Field,
+	Ctx,
+	UseMiddleware,
+	Int,
 } from "type-graphql";
 import { hash, compare } from "bcryptjs";
-import { sign } from "jsonwebtoken";
 import { User } from "./entity/User";
+import { MyContext } from "./MyContext";
+import { createRefreshToken, createAccessToken } from "./auth";
+import { isAuth } from "./isAuth";
+import { sendRefreshToken } from "./sendRefreshToken";
+import { getConnection } from "typeorm";
 
 @ObjectType()
 class LoginResponse {
@@ -23,18 +30,33 @@ export class UserResolver {
 		return "hi!";
 	}
 
+	@Query(() => String)
+	@UseMiddleware(isAuth)
+	bye(@Ctx() { payload }: MyContext) {
+		return `your user id is: ${payload!.userId}`;
+	}
+
 	@Query(() => [User])
 	users() {
 		return User.find();
 	}
 
+	@Mutation(() => Boolean)
+	async revokeRefreshTokensForUser(@Arg("userId", () => Int) userId: number) {
+		await getConnection()
+			.getRepository(User)
+			.increment({ id: userId }, "tokenVersion", 1);
+
+		return true;
+	}
+
 	@Mutation(() => LoginResponse)
 	async login(
 		@Arg("email", () => String) email: string,
-		@Arg("password", () => String) password: string
+		@Arg("password", () => String) password: string,
+		@Ctx() { res }: MyContext
 	): Promise<LoginResponse> {
 		const user = await User.findOne({ where: { email } });
-
 		if (!user) {
 			throw new Error("could not find user");
 		}
@@ -46,8 +68,10 @@ export class UserResolver {
 		}
 
 		//Login successful
+		sendRefreshToken(res, createRefreshToken(user));
+
 		return {
-			accessToken: sign({ userId: user.id }, "qwerqsdca", { expiresIn: "15m" }),
+			accessToken: createAccessToken(user),
 		};
 	}
 
