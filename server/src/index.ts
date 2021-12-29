@@ -10,9 +10,16 @@ import { verify } from "jsonwebtoken";
 import { User } from "./entity/User";
 import { createAccessToken, createRefreshToken } from "./auth";
 import { sendRefreshToken } from "./sendRefreshToken";
+import cors from "cors";
 
 async function listen(port: number) {
 	const app = express();
+	app.use(
+		cors({
+			origin: "http://localhost:3000",
+			credentials: true,
+		})
+	);
 	app.use(cookieParser());
 
 	app.get("/", (_req, res) => res.send("hello"));
@@ -38,7 +45,7 @@ async function listen(port: number) {
 			return res.send({ ok: false, accessToken: "" });
 		}
 
-		if( user.tokenVersion !== payload.tokenVersion ){
+		if (user.tokenVersion !== payload.tokenVersion) {
 			return res.send({ ok: false, accessToken: "" });
 		}
 
@@ -61,7 +68,7 @@ async function listen(port: number) {
 
 	await server.start();
 
-	server.applyMiddleware({ app });
+	server.applyMiddleware({ app, cors: false });
 
 	return new Promise((resolve, reject) => {
 		app.listen(port).once("listening", resolve).once("error", reject);

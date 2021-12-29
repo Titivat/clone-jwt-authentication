@@ -8,3 +8,5 @@ package-lock.json
 server/yarn-error.log
 server/src/.env
 server/.env
+yarn.lock
+web/yarn.lock
