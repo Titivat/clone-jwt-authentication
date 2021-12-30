@@ -1,5 +1,6 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Header } from "./Header";
 import { Bye } from "./pages/Bye";
 import { Home } from "./pages/Home";
 import { Login } from "./pages/Login";
@@ -9,20 +10,7 @@ const RoutesComponent: React.FC = () => {
 	return (
 		<BrowserRouter>
 			<div>
-				<header>
-					<div>
-						<Link to="/">Home</Link>
-					</div>
-					<div>
-						<Link to="/register">Register</Link>
-					</div>
-					<div>
-						<Link to="/login">Login</Link>
-					</div>
-					<div>
-						<Link to="/bye">Bye</Link>
-					</div>
-				</header>
+				<Header />
 				<Routes>
 					<Route path="/" element={<Home />} />
 					<Route path="/register" element={<Register />} />
